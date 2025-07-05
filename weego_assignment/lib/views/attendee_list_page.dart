@@ -39,6 +39,15 @@ class AttendeeListPage extends StatelessWidget {
               ),
             );
           }
+          
+          if (state is AttendeeUpdateSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Attendee updated successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
         },
         builder: (context, state) {
           if (state is AttendeeListInitial) {
@@ -73,6 +82,11 @@ class AttendeeListPage extends StatelessWidget {
                 ],
               ),
             );
+          }
+
+          if (state is AttendeeUpdateFailure) {
+            // I have done this to transition back to list
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is AttendeeListLoaded) {
@@ -344,14 +358,8 @@ class AttendeeListPage extends StatelessWidget {
         ),
       );
       
-      await context.read<AttendeeListCubit>().updateAttendee(result );
+      await context.read<AttendeeListCubit>().updateAttendee(result);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Attendee updated successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
     }
   }
 

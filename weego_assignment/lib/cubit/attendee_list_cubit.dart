@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:weego_assignment/utils/constant.dart';
 import 'dart:convert';
 import 'attendee_list_state.dart';
 import '../model/attendee.dart';
@@ -16,8 +17,7 @@ class AttendeeListCubit extends Cubit<AttendeeListState> {
         Uri.parse('$baseUrl/attendees?page=$page'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwic2NwIjoidXNlciIsImV4cCI6MTc1MjkxMjAyOSwiaWF0IjoxNzUxNzAyNDI5LCJqdGkiOiJhNjEyOTA0ZS1kMDVlLTRkMWEtOWFmYy03MGVjN2ZlNDcxNzEifQ.eQ9P0URb-Vpz9VXm8otRQTp-1fcS4qD8bVnHyttJSuk',
+          'Authorization': 'Bearer ${JWT}',
         },
       );
 
@@ -36,16 +36,16 @@ class AttendeeListCubit extends Cubit<AttendeeListState> {
   }
 
   Future<void> updateAttendee(Attendee attendee) async {
+    final previousState = state;
+
     try {
-      final previousState = state;
       emit(AttendeeUpdating());
 
       final response = await http.put(
         Uri.parse('$baseUrl/attendees/${attendee.id}'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwic2NwIjoidXNlciIsImV4cCI6MTc1MjkxMjAyOSwiaWF0IjoxNzUxNzAyNDI5LCJqdGkiOiJhNjEyOTA0ZS1kMDVlLTRkMWEtOWFmYy03MGVjN2ZlNDcxNzEifQ.eQ9P0URb-Vpz9VXm8otRQTp-1fcS4qD8bVnHyttJSuk',
+          'Authorization': 'Bearer ${JWT}',
         },
         body: json.encode(attendee.toJson()),
       );
@@ -60,6 +60,7 @@ class AttendeeListCubit extends Cubit<AttendeeListState> {
               'Failed to update attendee: ${jsonData['message'] ?? 'Unknown error'}',
             ),
           );
+          // doin this to restore previous state after showing error
           if (previousState is AttendeeListLoaded) {
             emit(
               AttendeeListLoaded(previousState.attendees, previousState.meta),
@@ -72,9 +73,17 @@ class AttendeeListCubit extends Cubit<AttendeeListState> {
             'Failed to update attendee: ${response.statusCode}',
           ),
         );
+        // doin this to restore previous state after showing error
+        if (previousState is AttendeeListLoaded) {
+          emit(AttendeeListLoaded(previousState.attendees, previousState.meta));
+        }
       }
     } catch (e) {
       emit(AttendeeUpdateFailure('Error updating attendee: $e'));
+      // Restore previous state after showing error
+      if (previousState is AttendeeListLoaded) {
+        emit(AttendeeListLoaded(previousState.attendees, previousState.meta));
+      }
     }
   }
 
