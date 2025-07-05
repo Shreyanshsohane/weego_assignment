@@ -17,12 +17,12 @@ class Meta {
 
   factory Meta.fromJson(Map<String, dynamic> json) {
     return Meta(
-      currentPage: json['current_page'],
+      currentPage: json['current_page'] ?? 1,
       nextPage: json['next_page'],
-      perPage: json['per_page'],
+      perPage: json['per_page'] ?? 10,
       prevPage: json['prev_page'],
-      totalPages: json['total_pages'],
-      totalCount: json['total_count'],
+      totalPages: json['total_pages'] ?? 1,
+      totalCount: json['total_count'] ?? 0,
     );
   }
 

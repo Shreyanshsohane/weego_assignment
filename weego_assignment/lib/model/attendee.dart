@@ -67,19 +67,32 @@ class Attendee {
 
   factory Attendee.fromJson(Map<String, dynamic> json) {
     return Attendee(
-      id: json['id'],
-      fullName: json['full_name'],
-      email: json['email'],
-      phoneNumber: json['phone_number'],
-      profilePictureUrls: Map<String, dynamic>.from(json['profile_picture_urls']),
-      dateOfBirth: json['date_of_birth'],
-      age: json['age'],
-      aadharNumber: json['aadhar_number'],
-      panNumber: json['pan_number'],
-      emergencyContactName: json['emergency_contact_name'],
-      emergencyContactPhoneNumber: json['emergency_contact_phone_number'],
-      completedTripsCount: json['completed_trips_count'],
-      vehicle: Vehicle.fromJson(json['vehicle']),
+      id: json['id'] ?? 0,
+      fullName: json['full_name'] ?? '',
+      email: json['email'] ?? '',
+      phoneNumber: json['phone_number'] ?? '',
+      profilePictureUrls: json['profile_picture_urls'] != null 
+          ? Map<String, dynamic>.from(json['profile_picture_urls'])
+          : <String, dynamic>{},
+      dateOfBirth: json['date_of_birth'] ?? '',
+      age: json['age'] ?? 0,
+      aadharNumber: json['aadhar_number'] ?? '',
+      panNumber: json['pan_number'] ?? '',
+      emergencyContactName: json['emergency_contact_name'] ?? '',
+      emergencyContactPhoneNumber: json['emergency_contact_phone_number'] ?? '',
+      completedTripsCount: json['completed_trips_count'] ?? 0,
+      vehicle: json['vehicle'] != null ? Vehicle.fromJson(json['vehicle']) : Vehicle(
+        id: 0,
+        name: '',
+        vehicleType: '',
+        numberPlate: '',
+        model: '',
+        capacity: 0,
+        fuelType: '',
+        mileage: 0,
+        vehiclePhotoUrls: <String, dynamic>{},
+        parkingLocation: '',
+      ),
     );
   }
 

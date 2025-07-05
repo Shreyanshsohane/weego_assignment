@@ -25,16 +25,18 @@ class Vehicle {
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      id: json['id'],
-      name: json['name'],
-      vehicleType: json['vehicle_type'],
-      numberPlate: json['number_plate'],
-      model: json['model'],
-      capacity: json['capacity'],
-      fuelType: json['fuel_type'],
-      mileage: json['mileage'],
-      vehiclePhotoUrls: Map<String, dynamic>.from(json['vehicle_photo_urls']),
-      parkingLocation: json['parking_location'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      vehicleType: json['vehicle_type'] ?? '',
+      numberPlate: json['number_plate'] ?? '',
+      model: json['model'] ?? '',
+      capacity: json['capacity'] ?? 0,
+      fuelType: json['fuel_type'] ?? '',
+      mileage: json['mileage'] ?? 0,
+      vehiclePhotoUrls: json['vehicle_photo_urls'] != null 
+          ? Map<String, dynamic>.from(json['vehicle_photo_urls'])
+          : <String, dynamic>{},
+      parkingLocation: json['parking_location'] ?? '',
     );
   }
 
