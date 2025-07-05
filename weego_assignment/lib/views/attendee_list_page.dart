@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/attendee_list_cubit.dart';
 import '../cubit/attendee_list_state.dart';
 import '../model/attendee.dart';
+import 'edit_attendee_modal.dart';
 
 class AttendeeListPage extends StatelessWidget {
   const AttendeeListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    print('testing');
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -19,14 +19,19 @@ class AttendeeListPage extends StatelessWidget {
         backgroundColor: Colors.deepPurple,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: BlocConsumer<AttendeeListCubit, AttendeeListState>(
         listener: (context, state) {
           if (state is AttendeeListError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          
+          if (state is AttendeeUpdateFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -99,7 +104,7 @@ class AttendeeListPage extends StatelessWidget {
                     itemCount: attendees.length,
                     itemBuilder: (context, index) {
                       final attendee = attendees[index];
-                      return _buildAttendeeCard(attendee);
+                      return _buildAttendeeCard(context, attendee);
                     },
                   ),
                 ),
@@ -171,7 +176,7 @@ class AttendeeListPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAttendeeCard(Attendee attendee) {
+  Widget _buildAttendeeCard(BuildContext context, Attendee attendee) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -231,6 +236,23 @@ class AttendeeListPage extends StatelessWidget {
                       color: Colors.green[700],
                     ),
                   ),
+                ),
+                const SizedBox(width: 8),
+                BlocBuilder<AttendeeListCubit, AttendeeListState>(
+                  builder: (context, state) {
+                    final isUpdating = state is AttendeeUpdating;
+                    return IconButton(
+                      onPressed: isUpdating ? null : () => _showEditModal(context, attendee),
+                      icon: isUpdating 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.edit, color: Colors.deepPurple),
+                      tooltip: isUpdating ? 'Updating...' : 'Edit Attendee',
+                    );
+                  },
                 ),
               ],
             ),
@@ -304,6 +326,33 @@ class AttendeeListPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showEditModal(BuildContext context, Attendee attendee) async {
+    final result = await showDialog<Attendee>(
+      context: context,
+      builder: (BuildContext context) {
+        return EditAttendeeModal(attendee: attendee);
+      },
+    );
+
+    if (result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Updating attendee...'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+      
+      await context.read<AttendeeListCubit>().updateAttendee(result );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Attendee updated successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
